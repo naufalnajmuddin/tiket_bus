@@ -1,0 +1,45 @@
+name: PHP CI/CD
+
+on:
+  push:
+    branches: [ "main" ]   # Atur branch utama Anda
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'   # Atur sesuai versi PHP Anda
+
+    - name: Validate PHP syntax
+      run: find . -name "*.php" -exec php -l {} \;
+
+    # Jika ada unit test, aktifkan ini
+    # - name: Run PHPUnit tests
+    #   run: vendor/bin/phpunit
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Contoh deploy via FTP (ke shared hosting/XAMPP server)
+    - name: Deploy to FTP server
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /htdocs/tiket_bus/   # Atur sesuai path di server Anda
